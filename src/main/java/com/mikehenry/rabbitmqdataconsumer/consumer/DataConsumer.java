@@ -26,6 +26,9 @@ public class DataConsumer implements ChannelAwareMessageListener {
     @Override
     public void onMessage(Message message, Channel channel) throws Exception {
         Logger logger = LoggerFactory.getLogger(DataConsumer.class);
+
+        logger.info("================DELIVERY TAG:"+message.getMessageProperties().getDeliveryTag()+"=============");
+
         logger.info("Request from Queue: " + new String(message.getBody()));
 
         try {
@@ -47,7 +50,7 @@ public class DataConsumer implements ChannelAwareMessageListener {
             e.printStackTrace();
         }
 
-        // Acknowledge the message in queue
+        logger.info("================ACKNOWLEDGING D.TAG:"+message.getMessageProperties().getDeliveryTag()+"=============");
         channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }
 
