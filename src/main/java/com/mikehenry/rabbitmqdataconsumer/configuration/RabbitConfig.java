@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Getter
 @Setter
-@AllArgsConstructor
 public class RabbitConfig {
 
     @Value("${spring.rabbitmq.host}")

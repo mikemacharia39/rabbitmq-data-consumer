@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Getter
 @Setter
-@AllArgsConstructor
 public class ApplicationConfiguration {
 
     @Value("${app.rabbitmq.queue}")

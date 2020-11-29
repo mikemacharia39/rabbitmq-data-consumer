@@ -2,38 +2,50 @@ package com.mikehenry.rabbitmqdataconsumer.consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mikehenry.rabbitmqdataconsumer.processor.RequestProcessor;
 import com.mikehenry.rabbitmqdataconsumer.configuration.ApplicationConfiguration;
 import com.mikehenry.rabbitmqdataconsumer.dto.DataRequest;
+import com.mikehenry.rabbitmqdataconsumer.processor.RequestProcessor;
 import com.rabbitmq.client.Channel;
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
+import org.springframework.amqp.rabbit.support.ListenerExecutionFailedException;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-
 @Component
+@AllArgsConstructor
 public class DataConsumer implements ChannelAwareMessageListener {
 
-    Logger logger = LoggerFactory.getLogger(DataConsumer.class);
-
-    ApplicationConfiguration appConfigs;
+    ApplicationConfiguration appConfigs = new ApplicationConfiguration();
 
     @Override
     public void onMessage(Message message, Channel channel) throws Exception {
+        Logger logger = LoggerFactory.getLogger(DataConsumer.class);
+        logger.info("Request from Queue: " + new String(message.getBody()));
 
-        logger.info("Request from Queue: " + Arrays.toString(message.getBody()));
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
 
-        ObjectMapper objectMapper = new ObjectMapper();
+            Map requestDataMap =  objectMapper.readValue(message.getBody(), Map.class);
 
-        DataRequest dataRequest = objectMapper.readValue(message.getBody(), DataRequest.class);
+            DataRequest dataRequest = DataRequest.builder()
+                    .employeeName(String.valueOf(requestDataMap.get("employeeName")))
+                    .salary(Double.parseDouble(String.valueOf(requestDataMap.get("salary"))))
+                    .age(Integer.parseInt(String.valueOf(requestDataMap.get("age"))))
+                    .build();
 
-        processRequest(dataRequest);
+            boolean status = processRequest(dataRequest);
+
+        } catch (ListenerExecutionFailedException e) {
+            logger.error("Exception getting message from queue: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // Acknowledge the message in queue
         channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
@@ -45,6 +57,7 @@ public class DataConsumer implements ChannelAwareMessageListener {
      * @return boolean true | false depending on outcome of processing request
      */
     private boolean processRequest(DataRequest dataRequest) {
+        Logger logger = LoggerFactory.getLogger(DataConsumer.class);
         try {
             RequestProcessor requestProcessor = new RequestProcessor();
 
@@ -55,6 +68,8 @@ public class DataConsumer implements ChannelAwareMessageListener {
 
             ObjectMapper dataMapper = new ObjectMapper();
             String params = dataMapper.writeValueAsString(paramMap);
+
+            logger.info("Request Parameters: " + params);
 
             String response = requestProcessor.processRequest(appConfigs.getEmployeeUrlCreate(), params);
 
@@ -83,6 +98,7 @@ public class DataConsumer implements ChannelAwareMessageListener {
      * @return Map
      */
     private Map processResponse(String response) {
+        Logger logger = LoggerFactory.getLogger(DataConsumer.class);
         Map responseMap = new HashMap();
         try {
             ObjectMapper mapper = new ObjectMapper();
