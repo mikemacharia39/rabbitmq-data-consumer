@@ -15,11 +15,13 @@
 
 * Publish the message below to your queue
 
-    `{
+
+    {
         "employeeName": "Mikehenry", 
         "salary": 130999, 
         "age": 39
-    }`
+    }
+    
 
 
 ### Application flows and processes
@@ -32,7 +34,7 @@
     
 ### Other Materials
 
-Big thanks to **Dummy Rest Api Example** for exposing API the project used for HTTP request processing.
+Big thanks to **Dummy Rest Api Example** for exposing Rest API examples the project used for HTTP request processing.
     
     * http://dummy.restapiexample.com/ 
  
