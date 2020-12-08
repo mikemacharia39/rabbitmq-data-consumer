@@ -33,8 +33,8 @@ public class RabbitMQConfiguration {
         SimpleMessageListenerContainer messageListenerContainer = new SimpleMessageListenerContainer();
 
         messageListenerContainer.setQueueNames(appConfig.getQueueName());
-        messageListenerContainer.setConcurrentConsumers(1);
-        messageListenerContainer.setMaxConcurrentConsumers(3);
+        messageListenerContainer.setConcurrentConsumers(3);
+        messageListenerContainer.setMaxConcurrentConsumers(5);
         messageListenerContainer.setAcknowledgeMode(AcknowledgeMode.MANUAL);
         //Tells the broker how many messages to send to each consumer in a single request.
         messageListenerContainer.setPrefetchCount(1);
